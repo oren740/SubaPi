@@ -1,0 +1,155 @@
+; sample logging configuration file for openport 2.0
+; must be named logcfg.txt and be placed in the root directory of the
+; microSD card inserted in the openport in order to work
+
+; this sample logs using the SSM protocol over the K-line, which works
+; for both CAN-based and older Subarus
+
+;----------------ssm----------------
+; log channel settings
+
+; we are logging SSM via the K-line
+type=ssmk				
+
+paramname = AF_Learning_#1
+paramid = 0x0A
+scalingrpn = x,128,-,0.78125,*	
+
+paramname = AF_Correction_#1
+paramid = 0x09
+scalingrpn = x,128,-,0.78125,*	
+
+paramname = AF_Sensor_#1
+paramid = 0x46
+scalingrpn = x,0.11484375,*	
+
+paramname = Engine_Load
+paramid = 0x200EE
+databits = 16
+scalingrpn = x,.00006103515625,*
+
+paramname = Mass_Airflow
+paramid = 0x13
+databits = 16				
+scalingrpn = x,0.01,*
+
+paramname = Manifold_Relative_Pressure_Direct
+paramid = 0x2192E
+databits = 16
+scalingrpn = x,32768,-,0.01933677,*
+
+paramname = Engine_Speed
+paramid = 0x0E				
+databits = 16				
+scalingrpn = x,0.25,*	
+
+paramname = Fine_Learning_Knock_Correction
+paramid = 0x20C65
+scalingrpn = x,.3515625,*,45-
+
+paramname = Feedback_Knock_Correction
+paramid = 0x20C60
+scalingrpn = x,.3515625,*,45-
+
+paramname = Gear_Position
+paramid = 0x4A
+scalingrpn = x,1,+
+
+paramname = Gear_Calculated
+paramid = 0x209C7
+scalingrpn = x,0,+
+
+paramname = IAM
+paramid = 0xF9
+scalingrpn = x,0.0625,*
+
+paramname = Ignition_Total_Timing
+paramid = 0x11
+scalingrpn = x,128,-,0.5,*
+
+paramname = Throttle_Opening_Angle
+paramid = 0x15
+scalingrpn = x,0.3921569,*
+
+paramname = Fueling_Final_Base
+paramid = 0x20B2C
+databits = 16
+scalingrpn = 30105.6,x,/
+
+paramname = CL/OL_Fueling
+paramid = 0x20F68
+scalingrpn = x,0,+
+
+paramname = Intake_Air_Temperature
+paramid = 0x12
+scalingrpn = x,0.40,-
+
+paramname = IPW
+paramid = 0x20
+scalingrpn = x,.256,*
+
+paramname = Primary_Wastegate_Duty_Cycle
+paramid = 0x30
+scalingrpn = x,0.3921569,*
+
+paramname = Vehicle_Speed
+paramid = 0x10
+scalingrpn = x,0.621371192,*
+
+type = calc
+paramname = IDC
+scalingrpn = Engine_Speed,IPW,*,0.0008333333,*
+
+;-------------triggers---------------
+;
+; note that parameters must be previously defined 
+; before defining triggers using them
+;
+; triggers allow you to control when logging starts and stops
+; this example sets up triggers such that logging only occurs
+; when the engine is running (RPM > 0)
+;
+; triggers consist of a condition (a RPN expression using comparison operators)
+; and an action. the RPN comparison operators match those in the C language:
+;
+; > < >= <= == != && ||
+;
+; if the condition evaluates to a non-zero value, that action is taken
+;
+; at present the following actions are available:
+;
+; start - starts logging to a file (if not already doing so)
+; stop - stops logging to a file
+; newfile - starts a new file (only if already logging to a file)
+;
+; IMPORTANT - if you have no triggers defined, logging will start automatically.
+; if you have *any* triggers defined, logging will not start until a start action
+; occurs
+
+conditionrpn = Engine_Speed,0,>	
+action = start
+
+conditionrpn = Engine_Speed,0,==
+action = stop
+
+; here is a second triggering example using the rear defogger switch
+; uncomment it and comment out the sample above to use it
+
+;conditionrpn = defogger_sw,1,==
+;action = start
+
+;conditionrpn = defogger_sw,0,==
+;action = stop
+
+
+; here is an example of using both previous values in a trigger and using
+; the newfile action.
+; this example starts a new logging file (logging must have already been started)
+; whenever the throttle increases from below 95% to above 95%
+; #throttle refers to the previous throttle sample
+
+; be careful with the conditions under which you create newfiles, or you may accidentally
+; create thousands of files!
+
+;conditionrpn = throttle,95,>,#throttle,95,<=,&&
+;action = newfile
