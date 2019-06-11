@@ -82,7 +82,7 @@ scalingrpn = x,0,+
 
 paramname = Intake_Air_Temperature
 paramid = 0x12
-scalingrpn = x,0.40,-
+scalingrpn = x,40,-
 
 paramname = IPW
 paramid = 0x20
