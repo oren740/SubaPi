@@ -20,32 +20,75 @@ battery_query = bytes([0x80, # header
 data_query = bytes([0x80, # header
                        0x10, # destination = Subaru ECU
                        0xF0, # source = Diagnostic tool
-                       0x35, # Data size...
+                       0x44, # Data size...
                        0xA8, # command = Address read
                        0x00, # single response
                        0x00, 0x00, 0x09,  # AF Correction #1 ((x-128) * 0.78125)
                        0x00, 0x00, 0x0A,  # AF Learning #1 ((x-128) * 0.78125)
                        0x00, 0x00, 0x46,  # AF Sensor #1 (x * 0.11484375)
                        0x02, 0x00, 0xEE,  # Engine load - 2 bytes (x * .00006103515625)
+                       0x02, 0x00, 0xEF,  # Engine load - 2 bytes (x * .00006103515625)
                        0x00, 0x00, 0x13,  # Mass Airflow - 2 bytes (x * 0.01)
+                       0x00, 0x00, 0x14,  # Mass Airflow - 2 bytes (x * 0.01)
                        0x02, 0x19, 0x2E,  # Manifold Relative Pressure Direct - 2 bytes ((x-32768) * 0.01933677)
+                       0x02, 0x19, 0x2F,  # Manifold Relative Pressure Direct - 2 bytes ((x-32768) * 0.01933677)
                        0x00, 0x00, 0x0E,  # Engine Speed - 2 bytes (x * 0.25)
+                       0x00, 0x00, 0x0F,  # Engine Speed - 2 bytes (x * 0.25)
                        0x02, 0x0C, 0x65,  # Fine Learning Knock Correction - (x*0.3515625-45)
                        0x02, 0x0C, 0x60,  # Feedback Knock Correction - (x*0.3515625-45)
                        0x00, 0x00, 0xF9,  # IAM - (x*0.0625)
                        0x00, 0x00, 0x11,  # Ignition Total Timing - ((x-128)*0.5)
                        0x00, 0x00, 0x15,  # Throttle Opening Angle - (x*0.3921569)
                        0x02, 0x0B, 0x2C,  # Fueling Final Base - 2 bytes (30105.6/x)
+                       0x02, 0x0B, 0x2D,  # Fueling Final Base - 2 bytes (30105.6/x)
                        0x02, 0x0F, 0x68,  # CL/OK Fueling - (x)
                        0x00, 0x00, 0x12,  # Intake Air Temperature - (x-40)
                        0x00, 0x00, 0x20,  # IPW - (x*.256)
                        0x00, 0x00, 0x10]) # Vehicle Speed (x * 0.621371192)
+
+data_cont_query = bytes([0x80, # header
+                       0x10, # destination = Subaru ECU
+                       0xF0, # source = Diagnostic tool
+                       0x44, # Data size...
+                       0xA8, # command = Address read
+                       0x01, # continuous response
+                       0x00, 0x00, 0x09,  # AF Correction #1 ((x-128) * 0.78125)
+                       0x00, 0x00, 0x0A,  # AF Learning #1 ((x-128) * 0.78125)
+                       0x00, 0x00, 0x46,  # AF Sensor #1 (x * 0.11484375)
+                       0x02, 0x00, 0xEE,  # Engine load - 2 bytes (x * .00006103515625)
+                       0x02, 0x00, 0xEF,  # Engine load - 2 bytes (x * .00006103515625)
+                       0x00, 0x00, 0x13,  # Mass Airflow - 2 bytes (x * 0.01)
+                       0x00, 0x00, 0x14,  # Mass Airflow - 2 bytes (x * 0.01)
+                       0x02, 0x19, 0x2E,  # Manifold Relative Pressure Direct - 2 bytes ((x-32768) * 0.01933677)
+                       0x02, 0x19, 0x2F,  # Manifold Relative Pressure Direct - 2 bytes ((x-32768) * 0.01933677)
+                       0x00, 0x00, 0x0E,  # Engine Speed - 2 bytes (x * 0.25)
+                       0x00, 0x00, 0x0F,  # Engine Speed - 2 bytes (x * 0.25)
+                       0x02, 0x0C, 0x65,  # Fine Learning Knock Correction - (x*0.3515625-45)
+                       0x02, 0x0C, 0x60,  # Feedback Knock Correction - (x*0.3515625-45)
+                       0x00, 0x00, 0xF9,  # IAM - (x*0.0625)
+                       0x00, 0x00, 0x11,  # Ignition Total Timing - ((x-128)*0.5)
+                       0x00, 0x00, 0x15,  # Throttle Opening Angle - (x*0.3921569)
+                       0x02, 0x0B, 0x2C,  # Fueling Final Base - 2 bytes (30105.6/x)
+                       0x02, 0x0B, 0x2D,  # Fueling Final Base - 2 bytes (30105.6/x)
+                       0x02, 0x0F, 0x68,  # CL/OL Fueling - (x)
+                       0x00, 0x00, 0x12,  # Intake Air Temperature - (x-40)
+                       0x00, 0x00, 0x20,  # IPW - (x*.256)
+                       0x00, 0x00, 0x10]) # Vehicle Speed (x * 0.621371192)
+
 
 ecu_init = bytes([0x80, # header
                   0x10, # destination = Subaru ECU
                   0xF0, # source = Diagnostic tool
                   0x01, # Data size...
                   0xBF]) # command = ECU Init
+
+#baud_change = bytes([0x80, # header
+#                     0x10, # destination = Subaru ECU
+#                     0xF0, # source = Diagnostic tool
+#                     0x05, # Data size..
+#                     0xB8, # Write single address
+#                     0x00, 0x01, 0x98, # Address for baud?
+#                     0x5A]) # Value to write
 
 def checksum(query):
     checksum = 0
@@ -59,9 +102,12 @@ def ecu_send(ser, query):
     logging.info("query: {}".format(binascii.hexlify(bytes_to_send)))
     ser.write(bytes_to_send)
 
-def ecu_receive(ser):
-    response = ser.read(100)
-    logging.info("response: {}".format(binascii.hexlify(response)))
+def ecu_receive(ser, length):
+    response = ser.read(length)
+    logging.info("response of len {}: {}".format(len(response), binascii.hexlify(response)))
+    if len(response) != length:
+        logging.error("Unexpected receive bytes on read")
+    return response
 
 def main():
     bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
@@ -70,29 +116,41 @@ def main():
 
     ser =  serial.Serial('/dev/ttyAMA0',
                          baudrate=4800,
-                         timeout=2,
+                         timeout=0.5,
                          parity=serial.PARITY_NONE,
                          stopbits=serial.STOPBITS_ONE,
                          bytesize=serial.EIGHTBITS)
 
     ecu_send(ser, ecu_init)
-    response = ecu_receive(ser)
+    response = ecu_receive(ser, 68)
+
+#    ecu_send(ser, baud_change)
+#    response = ecu_receive(ser, 100)
     
     ecu_send(ser, battery_query)
-    response = ecu_receive(ser)
+    response = ecu_receive(ser, 17)
 
     ecu_send(ser, data_query)
-    response = ecu_receive(ser)
+    response = ecu_receive(ser, 200)
 
-    rpm = 0
-    
+    ecu_send(ser, data_cont_query)
+    response = ecu_receive(ser, 101)
+
+    for i in range(10):
+        response = ecu_receive(ser, 28)
+
     while True:
-        msg = can.Message(arbitration_id=0x715,data=rpm.to_bytes(2, byteorder='big'),extended_id=False)
-        bus.send(msg)
-        rpm = rpm + 1
-        if rpm >= 64 * 1024:
-            rpm = 0
-        time.sleep(0.1)
+        response = ecu_receive(ser, 28)
+        if len(response) == 28:
+            msg0 = can.Message(arbitration_id=0x715,data=response[5:11],extended_id=False)
+            msg1 = can.Message(arbitration_id=0x716,data=response[12:18],extended_id=False)
+            msg2 = can.Message(arbitration_id=0x717,data=response[19:26],extended_id=False)
+            try:
+                bus.send(msg0)
+                bus.send(msg1)
+                bus.send(msg2)
+            except:
+                pass
             
 if __name__ == "__main__":
     main()
