@@ -112,7 +112,10 @@ def ecu_receive(ser, length):
 def main():
     bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
 
-    logging.basicConfig(format='%(asctime)s.%(msecs)03d %(message)s',datefmt='%Y-%m-%d,%H:%M:%S', level=logging.DEBUG)
+    logging.basicConfig(filename='/var/log/subapi',
+                        format='%(asctime)s.%(msecs)03d %(message)s',
+                        datefmt='%Y-%m-%d,%H:%M:%S',
+                        level=logging.DEBUG)
 
     ser =  serial.Serial('/dev/ttyAMA0',
                          baudrate=4800,
@@ -135,9 +138,6 @@ def main():
 
     ecu_send(ser, data_cont_query)
     response = ecu_receive(ser, 101)
-
-    for i in range(10):
-        response = ecu_receive(ser, 28)
 
     while True:
         response = ecu_receive(ser, 28)
