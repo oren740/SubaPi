@@ -41,7 +41,7 @@ data_query = bytes([0x80, # header
                        0x00, 0x00, 0x15,  # Throttle Opening Angle - (x*0.3921569)
                        0x02, 0x0B, 0x2C,  # Fueling Final Base - 2 bytes (30105.6/x)
                        0x02, 0x0B, 0x2D,  # Fueling Final Base - 2 bytes (30105.6/x)
-                       0x02, 0x0F, 0x68,  # CL/OK Fueling - (x)
+                       0x02, 0x0F, 0x68,  # CL/OL Fueling - (x)
                        0x00, 0x00, 0x12,  # Intake Air Temperature - (x-40)
                        0x00, 0x00, 0x20,  # IPW - (x*.256)
                        0x00, 0x00, 0x10]) # Vehicle Speed (x * 0.621371192)
@@ -143,14 +143,17 @@ def main():
         response = ecu_receive(ser, 28)
         if len(response) == 28:
             msg0 = can.Message(arbitration_id=0x715,data=response[5:11],extended_id=False)
-            msg1 = can.Message(arbitration_id=0x716,data=response[12:18],extended_id=False)
-            msg2 = can.Message(arbitration_id=0x717,data=response[19:26],extended_id=False)
+            msg1 = can.Message(arbitration_id=0x716,data=response[11:17],extended_id=False)
+            msg2 = can.Message(arbitration_id=0x717,data=response[17:24],extended_id=False)
             try:
                 bus.send(msg0)
                 bus.send(msg1)
                 bus.send(msg2)
             except:
                 pass
+        else:
+            ecu_send(ser, data_cont_query)
+            response = ecu_receive(ser, 101)
             
 if __name__ == "__main__":
     main()
