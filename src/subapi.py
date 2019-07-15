@@ -142,9 +142,9 @@ def main():
     while True:
         response = ecu_receive(ser, 28)
         if len(response) == 28:
-            msg0 = can.Message(arbitration_id=0x715,data=response[5:11],extended_id=False)
-            msg1 = can.Message(arbitration_id=0x716,data=response[11:17],extended_id=False)
-            msg2 = can.Message(arbitration_id=0x717,data=response[17:24],extended_id=False)
+            msg0 = can.Message(arbitration_id=0x715,data=response[5:12],extended_id=False)
+            msg1 = can.Message(arbitration_id=0x716,data=response[12:19],extended_id=False)
+            msg2 = can.Message(arbitration_id=0x717,data=response[19:27],extended_id=False)
             try:
                 bus.send(msg0)
                 bus.send(msg1)
