@@ -105,7 +105,7 @@ def ecu_send(ser, query):
 def ecu_receive(ser, length):
     response = ser.read(length)
     logging.info("response of len {}: {}".format(len(response), binascii.hexlify(response)))
-    if len(response) != length:
+    if len(response) != length and len(response) != 0:
         logging.error("Unexpected receive bytes on read")
     return response
 
