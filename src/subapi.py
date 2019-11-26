@@ -99,12 +99,12 @@ def checksum(query):
 def ecu_send(ser, query):
     bytes_to_send = query
     bytes_to_send += checksum(query)
-    logging.info("query: {}".format(binascii.hexlify(bytes_to_send)))
+#    logging.info("query: {}".format(binascii.hexlify(bytes_to_send)))
     ser.write(bytes_to_send)
 
 def ecu_receive(ser, length):
     response = ser.read(length)
-    logging.info("response of len {}: {}".format(len(response), binascii.hexlify(response)))
+#    logging.info("response of len {}: {}".format(len(response), binascii.hexlify(response)))
     if len(response) != length and len(response) != 0:
         logging.error("Unexpected receive bytes on read")
     return response
@@ -116,7 +116,8 @@ def main():
                         format='%(asctime)s.%(msecs)03d %(message)s',
                         datefmt='%Y-%m-%d,%H:%M:%S',
                         level=logging.DEBUG)
-
+    logging.info("Starting SubaPi")
+    
     ser =  serial.Serial('/dev/ttyAMA0',
                          baudrate=4800,
                          timeout=0.5,
