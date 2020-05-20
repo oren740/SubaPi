@@ -49,7 +49,7 @@ data_query = bytes([0x80, # header
 data_cont_query = bytes([0x80, # header
                        0x10, # destination = Subaru ECU
                        0xF0, # source = Diagnostic tool
-                       0x44, # Data size...
+                       0x47, # Data size...
                        0xA8, # command = Address read
                        0x01, # continuous response
                        0x00, 0x00, 0x09,  # AF Correction #1 ((x-128) * 0.78125)
@@ -73,7 +73,8 @@ data_cont_query = bytes([0x80, # header
                        0x02, 0x0D, 0xE2,  # CL/OL Fueling - (x)
                        0x00, 0x00, 0x12,  # Intake Air Temperature - (x-40)
                        0x00, 0x00, 0x20,  # IPW - (x*.256)
-                       0x00, 0x00, 0x10]) # Vehicle Speed (x * 0.621371192)
+                       0x00, 0x00, 0x10,  # Vehicle Speed (x * 0.621371192)
+                       0x00, 0x00, 0x64]) # Switches
 
 
 ecu_init = bytes([0x80, # header
@@ -138,23 +139,28 @@ def main():
     response = ecu_receive(ser, 200)
 
     ecu_send(ser, data_cont_query)
-    response = ecu_receive(ser, 101)
+    response = ecu_receive(ser, 105)
 
     while True:
-        response = ecu_receive(ser, 28)
-        if len(response) == 28:
+        response = ecu_receive(ser, 29)
+        if len(response) == 29:
             msg0 = can.Message(arbitration_id=0x715,data=response[5:12],extended_id=False)
             msg1 = can.Message(arbitration_id=0x716,data=response[12:19],extended_id=False)
             msg2 = can.Message(arbitration_id=0x717,data=response[19:27],extended_id=False)
+            msg3 = can.Message(arbitration_id=0x718,data=response[27:28],extended_id=False)
             try:
                 bus.send(msg0)
                 bus.send(msg1)
                 bus.send(msg2)
+                bus.send(msg3)
             except:
                 pass
         else:
+            ecu_send(ser, ecu_init)
+            response = ecu_receive(ser, 68)
+
             ecu_send(ser, data_cont_query)
-            response = ecu_receive(ser, 101)
+            response = ecu_receive(ser, 105)
             
 if __name__ == "__main__":
     main()
