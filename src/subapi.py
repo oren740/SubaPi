@@ -162,7 +162,7 @@ def main():
             response = ecu_receive(ser, 68)
 
             ecu_send(ser, data_cont_query)
-            response = ecu_receive(ser, 105)
+            response = ecu_receive(ser, 109)
             
 if __name__ == "__main__":
     main()
