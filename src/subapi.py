@@ -134,11 +134,13 @@ def main():
 #    ecu_send(ser, baud_change)
 #    response = ecu_receive(ser, 100)
     
-    ecu_send(ser, battery_query)
-    response = ecu_receive(ser, 17)
+#    ecu_send(ser, battery_query)
+#    response = ecu_receive(ser, 17)
 
-    ecu_send(ser, data_query)
-    response = ecu_receive(ser, 208)
+#    ecu_send(ser, data_query)
+#    response = ecu_receive(ser, 208)
+
+    time.sleep(1)
 
     ecu_send(ser, data_cont_query)
     response = ecu_receive(ser, 109)
@@ -160,6 +162,8 @@ def main():
         else:
             ecu_send(ser, ecu_init)
             response = ecu_receive(ser, 68)
+
+            time.sleep(1)
 
             ecu_send(ser, data_cont_query)
             response = ecu_receive(ser, 109)
