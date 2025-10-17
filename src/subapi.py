@@ -112,8 +112,21 @@ def ecu_receive(ser, length):
         logging.error("Unexpected receive bytes on read")
     return response
 
+def get_temp():
+    temp = 0
+    therm_file = '/sys/class/thermal/thermal_zone0/temp'
+    with open(therm_file, 'r') as infile:
+        temp = int(int(infile.readline()) / 1000)
+    return temp
+
 def main():
+    #print(get_temp())
+    #sys.exit(1)
+
     bus = can.interface.Bus(channel='can0', bustype='socketcan_native')
+    #temperature = get_temp()
+    #msg4 = can.Message(arbitration_id=0x719,data=[temperature],extended_id=False)
+    #bus.send(msg4)
 
     logging.basicConfig(filename='/var/log/subapi',
                         format='%(asctime)s.%(msecs)03d %(message)s',
@@ -146,17 +159,20 @@ def main():
     response = ecu_receive(ser, 109)
 
     while True:
+        temperature = get_temp()
         response = ecu_receive(ser, 30)
         if len(response) == 30:
             msg0 = can.Message(arbitration_id=0x715,data=response[5:12],extended_id=False)
             msg1 = can.Message(arbitration_id=0x716,data=response[12:19],extended_id=False)
             msg2 = can.Message(arbitration_id=0x717,data=response[19:27],extended_id=False)
             msg3 = can.Message(arbitration_id=0x718,data=response[27:29],extended_id=False)
+            msg4 = can.Message(arbitration_id=0x719,data=[temperature],extended_id=False)
             try:
                 bus.send(msg0)
                 bus.send(msg1)
                 bus.send(msg2)
                 bus.send(msg3)
+                bus.send(msg4)
             except:
                 pass
         else:
